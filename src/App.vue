@@ -80,7 +80,7 @@ const clearCanvas = () => {
 onMounted(() => {
   if (canvasRef.value) {
     canvasRef.value.width = 1920
-    canvasRef.value.height = 1280
+    canvasRef.value.height = 1480
     ctx = canvasRef.value.getContext('2d')
     if (ctx) {
       ctx.lineWidth = 2
