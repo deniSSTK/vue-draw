@@ -1,0 +1,77 @@
+:root {
+    --vue-draw-primary-n: 66, 185, 131;
+    --vue-draw-primary: rgb(var(--vue-draw-primary-n));
+    --vue-draw-primary-bg: rgba(var(--vue-draw-primary-n), .5);
+
+    --vue-draw-white: #fff;
+
+    --vue-draw-backdrop-filter: blur(12px);
+    --vue-draw-tr-duration: .2s;
+
+    --vue-draw-border-sm: 5px;
+    --vue-draw-border-md: calc(var(--vue-draw-border-sm) * 2);
+    --vue-draw-border-lg: calc(var(--vue-draw-border-sm) * 3);
+    --vue-draw-gap: 10px;
+    --vue-draw-padding: 10px;
+}
+
+/*ONLY ON DEV MODE*/
+html, body, #app {
+    padding: 0;
+    margin: 0;
+    height: 100%;
+}
+/*ONLY ON DEV MODE*/
+
+.vue--draw__container * {
+    box-sizing: border-box;
+}
+
+.vue--draw__container button {
+    border: none;
+    cursor: pointer;
+}
+
+.vue--draw__container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.vue--draw__canvas {
+    background-color: var(--vue-draw-white);
+    width: 100%;
+    height: 100%;
+}
+
+.vue--draw__tools {
+    height: 60px;
+    width: max-content;
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: var(--vue-draw-border-md);
+    background-color: var(--vue-draw-primary-bg);
+    backdrop-filter: var(--vue-draw-backdrop-filter);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--vue-draw-gap);
+    padding: 0 var(--vue-draw-padding);
+}
+
+.vue--draw__tools__item {
+    height: 40px;
+    width: 40px;
+    gap: var(--vue-draw-gap);
+    border-radius: var(--vue-draw-border-md);
+    background-color: var(--vue-draw-primary-bg);
+    transition: var(--vue-draw-tr-duration);
+}
+
+.vue--draw__tools__item:hover {
+    background-color: var(--vue-draw-primary);
+}
