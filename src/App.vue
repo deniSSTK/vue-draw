@@ -22,11 +22,11 @@
 import { ref } from 'vue'
 const canvasRef=ref<HTMLCanvasElement|null>(null);
 const ClearCanvas = () => {
-  if (canvasRef.value) {
-    const ctx=canvasRef.value.getContext('2d');
-    if(ctx){
-      ctx.clearRect(0,0, canvasRef.value.width, canvasRef.value.height);
+    if (canvasRef.value) {
+        const ctx=canvasRef.value.getContext('2d');
+        if(ctx) {
+            ctx.clearRect(0,0, canvasRef.value.width, canvasRef.value.height);
+        }
     }
-  }
 }
 </script>
