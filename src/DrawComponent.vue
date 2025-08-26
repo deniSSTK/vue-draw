@@ -22,27 +22,31 @@
 </template>
 
 <script setup lang="ts">
-import {ref, onMounted, watch} from 'vue'
+import {ref, reactive, onMounted,onBeforeUnmount, watch} from 'vue'
 import {eToolType} from "./enums/tool-enums.ts";
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const currentTool = ref<eToolType | null>(null)
 
-//TODO эти let переменные сделать тоже ref<>, а лучше всего вообще через reactive
-let ctx: CanvasRenderingContext2D | null = null
-let drawing = false
-let lastX = 0
-let lastY = 0
+//все через state☑️☑️☑️
+const state = reactive({
+    ctx: null as CanvasRenderingContext2D | null,
+    drawing: false,
+    lastX: 0,
+    lastY: 0
+})
 
-//TODO сделай что бы сюда применялся изначально --vue-draw-black из :root
-const pencilColor = ref('#000000')
+//TODO сделай что бы сюда применялся изначально --vue-draw-black из :root :☑️☑️☑️☑️
+const pencilColor = ref(
+    getComputedStyle(document.documentElement).getPropertyValue("--vue-draw-black").trim()
+)
 const toolSize = ref(2)
 
 const selectEraser = () => {
     currentTool.value = eToolType.ERASER
-    if (ctx) {
-        ctx.globalCompositeOperation = 'destination-out'
-        ctx.lineWidth = 20
+    if (state.ctx) {
+        state.ctx.globalCompositeOperation = 'destination-out'
+        state.ctx.lineWidth = 20
         toolSize.value = 5
         console.log("eraser work")
     }
@@ -50,10 +54,10 @@ const selectEraser = () => {
 
 const selectPencil = () => {
     currentTool.value = eToolType.PENCIL
-    if (ctx) {
-        ctx.globalCompositeOperation = 'source-over'
-        ctx.strokeStyle = pencilColor.value
-        ctx.lineWidth = 2
+    if (state.ctx) {
+        state.ctx.globalCompositeOperation = 'source-over'
+        state.ctx.strokeStyle = pencilColor.value
+        state.ctx.lineWidth = 2
         toolSize.value = 2
         console.log("pencil work")
     }
@@ -61,25 +65,24 @@ const selectPencil = () => {
 
 const selectPen = () => {
     currentTool.value = eToolType.PEN
-    if (ctx) {
-        ctx.globalCompositeOperation = 'source-over'
-        ctx.strokeStyle = pencilColor.value
-        ctx.lineWidth = 1
+    if (state.ctx) {
+        state.ctx.globalCompositeOperation = 'source-over'
+        state.ctx.strokeStyle = pencilColor.value
+        state.ctx.lineWidth = 1
         toolSize.value = 1
-        ctx.lineCap = 'round'
+        state.ctx.lineCap = 'round'
     }
 }
 
 const selectMarker = () => {
     currentTool.value = eToolType.MARKER
-    if (ctx) {
-        ctx.globalCompositeOperation = 'source-over'
-        ctx.strokeStyle = pencilColor.value
-        ctx.lineWidth = 15
+    if (state.ctx) {
+        state.ctx.globalCompositeOperation = 'source-over'
+        state.ctx.lineWidth = 15
         toolSize.value = 15
-        ctx.lineCap = 'round'
-        ctx.lineJoin = 'round'
-        ctx.strokeStyle = hexToRgba(pencilColor.value, 0.3)
+        state.ctx.lineCap = 'round'
+        state.ctx.lineJoin = 'round'
+        state.ctx.strokeStyle = hexToRgba(pencilColor.value, 0.3)
     }
 }
 
@@ -100,69 +103,70 @@ const getMousePos = (e: MouseEvent) => {
 }
 
 const onPointerDown = (e: MouseEvent) => {
-    if (!ctx || !currentTool) return
-    drawing = true
-    //ctx.strokeStyle=pencilColor.value
+    if (!state.ctx || !currentTool.value) return
+    state.drawing = true
     const pos = getMousePos(e)
-    lastX = pos.x
-    lastY = pos.y
-    ctx.beginPath()
-    ctx.moveTo(lastX, lastY)
+    state.lastX = pos.x
+    state.lastY = pos.y
+    state.ctx.beginPath()
+    state.ctx.moveTo(state.lastX, state.lastY)
 }
 
 const onPointerUp = () => {
-    drawing = false
+    state.drawing = false
 }
 
 const onPointerMove = (e: MouseEvent) => {
-    if (!drawing || !ctx || !currentTool) return
+    if (!state.drawing || !state.ctx || !currentTool.value) return
     const pos = getMousePos(e)
-    const midX = (lastX + pos.x) / 2
-    const midY = (lastY + pos.y) / 2
-    ctx.quadraticCurveTo(lastX, lastY, midX, midY)
-    ctx.stroke()
-    lastX = pos.x
-    lastY = pos.y
+    const midX = (state.lastX + pos.x) / 2
+    const midY = (state.lastY + pos.y) / 2
+    state.ctx.quadraticCurveTo(state.lastX, state.lastY, midX, midY)
+    state.ctx.stroke()
+    state.lastX = pos.x
+    state.lastY = pos.y
 }
 
 const clearCanvas = () => {
-    if (ctx && canvasRef.value) {
-        ctx.clearRect(0, 0, canvasRef.value.width, canvasRef.value.height)
+    if (state.ctx && canvasRef.value) {
+        state.ctx.clearRect(0, 0, canvasRef.value.width, canvasRef.value.height)
     }
 }
 
 watch(pencilColor, (newColor) => {
-    if (!ctx) return
+    if (!state.ctx) return
     if (currentTool.value === eToolType.PENCIL || currentTool.value === eToolType.PEN) {
-        ctx.strokeStyle = newColor
+        state.ctx.strokeStyle = newColor
     } else if (currentTool.value === eToolType.MARKER) {
-        ctx.strokeStyle = hexToRgba(newColor, 0.3)
+        state.ctx.strokeStyle = hexToRgba(newColor, 0.3)
     }
 })
 
 watch(toolSize,(newSize)=>{
-    if(!ctx) return
-    ctx.lineWidth=newSize
+    if(!state.ctx) return
+    state.ctx.lineWidth=newSize
 })
-
+//TODO добавить в onBeforeUnmount удаление этого event listener ☑️☑️☑️☑️☑️☑️
+const handleResize = () => {
+    if(!canvasRef.value) return
+    canvasRef.value.width = window.innerWidth
+    canvasRef.value.height = window.innerHeight
+}
 onMounted(() => {
     if (canvasRef.value) {
         canvasRef.value.width = window.innerWidth
         canvasRef.value.height = window.innerHeight
-        ctx = canvasRef.value.getContext('2d')
-        if (ctx) {
-            ctx.lineWidth = 2
-            ctx.lineCap = 'round'
-            ctx.strokeStyle = pencilColor.value
+        state.ctx = canvasRef.value.getContext('2d')
+        if (state.ctx) {
+            state.ctx.lineWidth = 2
+            state.ctx.lineCap = 'round'
+            state.ctx.strokeStyle = pencilColor.value
         }
+        window.addEventListener('resize', handleResize)
     }
-
-    //TODO добавить в onBeforeUnmount удаление этого event listener
-    window.addEventListener("resize", () => {
-        if (canvasRef.value) {
-            canvasRef.value.width = window.innerWidth
-            canvasRef.value.height = window.innerHeight
-        }
-    })
 })
+onBeforeUnmount(() => {
+    window.addEventListener('resize', handleResize)
+})
+
 </script>

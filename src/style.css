@@ -14,6 +14,10 @@
     --vue-draw-gap: 10px;
     --vue-draw-padding: 10px;
 
+
+    --vue-draw-black:#000000;
+
+
     --vue-draw-active: 52,144,220;
     .vue-draw__tools__item.active{
         background-color: rgb(var(--vue-draw-active));
