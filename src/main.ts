@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import './style.css'
-import App from './App.vue'
+import DrawComponent from './DrawComponent.vue'
 
-createApp(App).mount('#app')
+createApp(DrawComponent)
+    .mount('#app')
