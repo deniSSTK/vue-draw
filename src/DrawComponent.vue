@@ -15,6 +15,7 @@
             <button class="vue--draw__tools__item" @click="selectEraser">🩹</button>
             <button class="vue--draw__tools__item" @click="clearCanvas">X</button>
             <input type="color" v-model="pencilColor">
+            <input type="file" accept="image/*" @change="handleImageUpload">
             <label>Size: {{ toolSize }}</label>
             <input type="range" min="1" max="50" v-model="toolSize">
         </div>
@@ -166,7 +167,18 @@ onMounted(() => {
     }
 })
 onBeforeUnmount(() => {
-    window.addEventListener('resize', handleResize)
+    window.removeEventListener('resize', handleResize)
 })
-
+const handleImageUpload =(event: Event) => {
+    const target = event.target as HTMLInputElement
+    if(!target.files || !target.files[0] || !canvasRef.value || !state.ctx) return
+    const file = target.files[0]
+    const img = new Image()
+    const objectUrl = URL.createObjectURL(file)
+    img.src = objectUrl
+    img.onload = () => {
+        state.ctx!.drawImage(img, 0, 0, canvasRef.value!.width, canvasRef.value!.height)
+        URL.revokeObjectURL(objectUrl)
+    }
+}
 </script>
